@@ -13,17 +13,14 @@ elpaisdb <- connect()
 last_check <- dbReadTable(elpaisdb, "last_check")
 dbDisconnect(elpaisdb)
 
-
 if(nrow(last_check) > 0 ) {
   
   message('Checking words in elpais.com search engine...')
   
-  session <- ChromoteSession$new()
-  
   # CHECK IN THE elpais.com SEARCH ENGINE THE WORDS THAT WERE NOT FOUND IN THE DATABASE
   last_check <- 
     last_check %>% 
-    mutate(elpaischeck = map_lgl(word, elpais_check, session = session))
+    mutate(elpaischeck = map_lgl(word, elpais_check))
   
   # FILTER THE WORDS THAT WERE NOT FOUN IN THE elpais.com SEARCH ENGINE
   # ALSO FILTER OUT WORDS WITH LESS THAN 3 CHARACTERS

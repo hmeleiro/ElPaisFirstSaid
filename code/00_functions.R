@@ -257,22 +257,19 @@ google_check <- function(word) {
 }
 
 
-elpais_check <- function(session, query) {
-  require(chromote)
-  url <- sprintf("https://elpais.com/buscador/?q=%s", query)
+elpais_check <- function(query) {
+  require(httr)
+  url <- sprintf("https://elpais.com/pf/api/v3/content/fetch/enp-search-results?query={%%22q%%22:%%22%s%%22,%%22page%%22:1,%%22limit%%22:20,%%22language%%22:%%22es%%22}&_website=el-pais", query)
+  x <- GET(url)
   
-  session$Page$navigate(url)
-  Sys.sleep(1.8)
-  innerText <- session$Runtime$evaluate('document.querySelector("#search-results-counter")?.innerText')
-  nresults <- str_extract(innerText$result$value, "[0-9]+")
-  
-  if(!is.na(nresults)) {
-    check <- as.numeric(nresults) > 1
+  if(!http_error(x$status_code)) {
+    res <- content(x)
+    return(res$numResults > 1)
   } else {
-    check <- F
+    return(F)
   }
   
-  return(check)
+  Sys.sleep(1.5)
 }
 
 
