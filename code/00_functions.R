@@ -144,16 +144,14 @@ scrap_article <- function(url) {
       html_text() %>% 
       ifelse(length(.) == 0, NA, .)
     
-    body <- 
-      html %>% 
-      html_elements("article p") %>% 
-      html_text2(preserve_nbsp = T) 
     
-    # Removes template text from embed instagram posts
-    body <- body[!grepl("A post shared by", body)]
+    body <- html %>% 
+      html_element(".a_c") %>%
+      html_children()
     
     body <- 
-      body %>% 
+      body[html_name(body) == "p"] %>% 
+      html_text2(preserve_nbsp = T) %>% 
       paste0(collapse = " ") %>% 
       ifelse(length(.) == 0, NA, .)
     
