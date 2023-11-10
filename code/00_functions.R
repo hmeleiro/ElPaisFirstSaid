@@ -166,7 +166,6 @@ scrap_article <- function(url) {
 }
 
 cleanString <- function(text) {
-  
   # source: # https://gist.github.com/somerandomnerd/7529732
   # PROPER_NOUNS <- "(([A-Z]([a-z]+|\.+))+(\s[A-Z][a-z]+)+)|([A-Z]{2,})|([a-z][A-Z])[a-z]*[A-Z][a-z]*"
   PROPER_NOUNS <- "([A-Z]|[À-Ü])([A-Z]|[À-Ü]|[a-z]|[à-ü])+"
@@ -177,13 +176,15 @@ cleanString <- function(text) {
   URL_TWITTER_PICS <- "pic\\.twitter\\.(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
   TWITTER_HANDLES <- "#[A-ZÀ-Üa-zà-ü0-9_ñ]+|@[A-Za-z0-9_]+|@[A-Za-z0-9]+|\\w+(?:\\.\\w+)*/\\S+"
   ALL_UPPERCASE <- "(\\s|[[:punct:]])[[:upper:]]{2,}(\\s|[[:punct:]])"
+  INVISIBLE_CHARS <- "[^\\P{C}\r\n]+"
   
   text %>% 
+    gsub(pattern = INVISIBLE_CHARS, replacement = "", perl=TRUE) %>% 
     gsub(pattern = URL_TWITTER_PICS, replacement = " ") %>%
     gsub(pattern = URL, replacement = " ") %>%
     gsub(pattern = ALL_UPPERCASE, replacement = " ") %>%
     gsub(pattern = TWITTER_HANDLES, replacement = " ") %>%
-    gsub(pattern = PUNCTS_NUMS, replacement = " ") %>%
+    gsub(pattern = PUNCTS_NUMS, replacement = " ") %>% 
     gsub(pattern = MULTIPLE_SPACES, replacement = " ") %>%
     gsub(pattern = PROPER_NOUNS, replacement = "") %>% 
     gsub(pattern = MULTIPLE_SPACES, replacement = " ") 
