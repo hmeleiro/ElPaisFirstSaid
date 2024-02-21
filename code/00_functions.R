@@ -282,12 +282,12 @@ elpais_check <- function(word) {
       html_elements("h2") %>% 
       html_text()
     
+    Sys.sleep(1.5)
     return(length(results) > 1)
   } else {
+    Sys.sleep(1.5)
     return(F)
   }
-  
-  Sys.sleep(1.5)
 }
 
 
