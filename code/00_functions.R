@@ -18,8 +18,6 @@ connect <- function() {
   return(con)
 }
 
-
-
 scrap_frontpage <- function(date) {
   require(httr2)
   require(dplyr)
@@ -230,40 +228,61 @@ google_search <- function(query, ...) {
   require(dplyr)
   require(httr2)
   
-  google_api_key <- Sys.getenv("GOOGLE_SEARCH_KEY")
-  cx <- Sys.getenv("GOOGLE_SEARCH_ELPAIS_CX")
+  envvars <- Sys.getenv()
+  google_api_keys <- envvars[grepl("GOOGLE_SEARCH_KEY", names(envvars))]
+  cxs <- envvars[grepl("ELPAIS_CX", names(envvars))]
   
-  baseurl <- "https://www.googleapis.com/customsearch/v1"
-  resp <- request(baseurl) %>%
-    req_url_query(
-      key = google_api_key, 
-      cx = cx, 
-      q = query,
-      exactTerms = query
-      # ...
-    ) %>% 
-    req_error(is_error = function(resp) FALSE) %>% 
-    req_perform()
-  
-  resp_body_json(resp) 
+  while(length(google_api_keys) > 0) {
+    baseurl <- "https://www.googleapis.com/customsearch/v1"
+    resp <- request(baseurl) %>%
+      req_url_query(
+        key = google_api_keys[1], 
+        cx = cxs[1], 
+        q = query,
+        exactTerms = query
+        # ...
+      ) %>% 
+      req_error(is_error = function(resp) FALSE) %>% 
+      req_perform()
+    
+    resp_json <- resp_body_json(resp) 
+    
+    if(length(resp_json$error) > 1) {
+      google_api_keys <- google_api_keys[-1]
+      cxs <- cxs[-1]
+    } else {
+        return(resp_json)
+    }
+  }
+
 }
 
 google_check <- function(word) {
   results <- google_search(word)
+  
+  if(is.null(results)) {
+    return(results)
+    }
+
   check <- as.numeric(results$searchInformation$totalResults) > 1
   Sys.sleep(1)
   return(check)
 }
 
 
-elpais_check <- function(query) {
+elpais_check <- function(word) {
   require(httr)
-  url <- sprintf("https://elpais.com/pf/api/v3/content/fetch/enp-search-results?query={%%22q%%22:%%22%s%%22,%%22page%%22:1,%%22limit%%22:20,%%22language%%22:%%22es%%22}&_website=el-pais", query)
+  require(rvest)
+  url <- sprintf("https://elpais.com/buscador/%s/", word)
   x <- GET(url)
   
   if(!http_error(x$status_code)) {
     res <- content(x)
-    return(res$numResults > 1)
+    results <- res %>% 
+      html_elements("h2") %>% 
+      html_text()
+    
+    return(length(results) > 1)
   } else {
     return(F)
   }

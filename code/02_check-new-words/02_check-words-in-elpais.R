@@ -3,7 +3,6 @@ suppressPackageStartupMessages({
   library(DBI)
   library(RMariaDB)
   library(purrr)
-  library(chromote)
   library(stringr)
 })
 
@@ -22,7 +21,7 @@ if(nrow(last_check) > 0 ) {
     last_check %>% 
     mutate(elpaischeck = map_lgl(word, elpais_check))
   
-  # FILTER THE WORDS THAT WERE NOT FOUN IN THE elpais.com SEARCH ENGINE
+  # FILTER THE WORDS THAT WERE NOT FOUND IN THE elpais.com SEARCH ENGINE
   # ALSO FILTER OUT WORDS WITH LESS THAN 3 CHARACTERS
   firstSaidWords <- 
     last_check %>% 
@@ -73,8 +72,5 @@ if(nrow(last_check) > 0 ) {
     res <- dbExecute(elpaisdb, q)
   },
   finally = dbDisconnect(elpaisdb)
-  )
-  
-  session$close()
-  
+  )  
 }

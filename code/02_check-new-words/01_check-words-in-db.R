@@ -1,4 +1,3 @@
-
 suppressPackageStartupMessages({
   library(dplyr)
   library(DBI)
@@ -19,6 +18,7 @@ articles <-
       scrap_today_frontpage() %>% 
       filter(
         grepl("/elpais\\.com", url),
+        !grepl("/quaderns/", url),
         nchar(url) >= 60
       )
     
@@ -27,7 +27,6 @@ articles <-
   error = function(e) {
     message(date, " ", e$message)
   })
-
 
 message('Checking words in database...')
 firstSaidWords <- map_df(1:nrow(articles), function(i) {
